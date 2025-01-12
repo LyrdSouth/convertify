@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Convertify - Media Conversion Made Easy</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">Convertify</div>
+            <ul>
+                <li><a href="#home">Home</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero">
+            <h1>Convert Your Media Files</h1>
+            <p>Easy, fast, and free media conversion</p>
+        </section>
+
+        <section class="converter">
+            <div class="converter-container">
+                <div class="upload-area" id="dropZone">
+                    <img src="upload-icon.svg" alt="Upload" class="upload-icon">
+                    <p>Drag and drop your file here or</p>
+                    <input type="file" id="fileInput" accept="video/*" hidden>
+                    <button id="uploadButton">Choose File</button>
+                </div>
+
+                <div class="conversion-options">
+                    <h3>Convert to:</h3>
+                    <select id="formatSelect">
+                        <option value="gif">GIF</option>
+                        <option value="mp4">MP4</option>
+                        <option value="webm">WebM</option>
+                        <option value="mp3">MP3</option>
+                    </select>
+
+                    <div class="quality-options">
+                        <label>Quality:</label>
+                        <select id="qualitySelect">
+                            <option value="high">High</option>
+                            <option value="medium">Medium</option>
+                            <option value="low">Low</option>
+                        </select>
+                    </div>
+
+                    <button id="convertButton" disabled>Convert</button>
+                </div>
+
+                <div class="conversion-progress" hidden>
+                    <div class="progress-bar">
+                        <div class="progress" id="progressBar"></div>
+                    </div>
+                    <p id="progressText">Converting... 0%</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Convertify. All rights reserved.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html> 
