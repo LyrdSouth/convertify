@@ -60,17 +60,36 @@ document.addEventListener('DOMContentLoaded', () => {
         convertButton.disabled = true;
 
         try {
-            // In a real implementation, you would:
-            // 1. Create a FormData object with the file and conversion options
-            // 2. Send it to your backend server
-            // 3. Use FFmpeg on the server to convert the file
-            // 4. Send progress updates to the frontend
-            // 5. Return the converted file
+            // Create FormData object
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+            formData.append('format', format);
+            formData.append('quality', quality);
 
-            // This is a simulation of the conversion process
-            await simulateConversion();
+            // Send file to server
+            const response = await fetch('/convert', {
+                method: 'POST',
+                body: formData
+            });
 
-            alert('Conversion completed! The file would now be downloaded.');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            // Get the blob from the response
+            const blob = await response.blob();
+            
+            // Create a download link
+            const downloadUrl = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = downloadUrl;
+            a.download = `converted-file.${format}`; // Set the filename
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(downloadUrl);
+            document.body.removeChild(a);
+
+            alert('Conversion completed! Download should begin automatically.');
         } catch (error) {
             alert('An error occurred during conversion');
             console.error(error);
