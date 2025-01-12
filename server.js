@@ -35,18 +35,38 @@ app.post('/convert', upload.single('file'), (req, res) => {
     switch(req.body.format) {
         case 'gif':
             command
-                .size('640x?')
-                .fps(10);
+                .size('720x?')
+                .fps(15)
+                .outputOptions([
+                    '-vf scale=720:-1:flags=lanczos',
+                    '-loop 0'
+                ]);
             break;
         case 'mp4':
             command
                 .videoCodec('libx264')
-                .audioCodec('aac');
+                .audioCodec('aac')
+                .outputOptions([
+                    '-preset slow',
+                    '-crf 22',
+                    '-movflags +faststart'
+                ]);
+            break;
+        case 'webm':
+            command
+                .videoCodec('libvpx-vp9')
+                .audioCodec('libopus')
+                .outputOptions([
+                    '-crf 30',
+                    '-b:v 0',
+                    '-deadline good'
+                ]);
             break;
         case 'mp3':
             command
                 .toFormat('mp3')
-                .audioCodec('libmp3lame');
+                .audioCodec('libmp3lame')
+                .audioBitrate('320k');
             break;
     }
 
@@ -54,16 +74,32 @@ app.post('/convert', upload.single('file'), (req, res) => {
     if (req.body.quality) {
         switch(req.body.quality) {
             case 'low':
-                command.videoBitrate('500k');
+                command.outputOptions([
+                    '-b:v 1000k',
+                    '-b:a 128k'
+                ]);
                 break;
             case 'medium':
-                command.videoBitrate('1000k');
+                command.outputOptions([
+                    '-b:v 2500k',
+                    '-b:a 192k'
+                ]);
                 break;
             case 'high':
-                command.videoBitrate('2000k');
+                command.outputOptions([
+                    '-b:v 5000k',
+                    '-b:a 320k',
+                    '-preset slower'
+                ]);
                 break;
         }
     }
+
+    // Add general quality improvements
+    command.outputOptions([
+        '-threads 0',
+        '-map_metadata -1'
+    ]);
 
     command
         .on('progress', (progress) => {
