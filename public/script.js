@@ -9,6 +9,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let selectedFile = null;
 
+    // Add socket.io connection
+    const socket = io();
+
+    // Listen for progress updates
+    socket.on('conversionProgress', (data) => {
+        progressBar.style.width = `${data.percent}%`;
+        progressText.textContent = `Converting... ${data.percent}%`;
+    });
+
     // Handle file selection
     uploadButton.addEventListener('click', () => {
         fileInput.click();
@@ -58,15 +67,15 @@ document.addEventListener('DOMContentLoaded', () => {
         // Show progress UI
         conversionProgress.hidden = false;
         convertButton.disabled = true;
+        progressBar.style.width = '0%';
+        progressText.textContent = 'Converting... 0%';
 
         try {
-            // Create FormData object
             const formData = new FormData();
             formData.append('file', selectedFile);
             formData.append('format', format);
             formData.append('quality', quality);
 
-            // Send file to server
             const response = await fetch('/convert', {
                 method: 'POST',
                 body: formData
@@ -76,20 +85,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
-            // Get the blob from the response
             const blob = await response.blob();
             
-            // Create a download link
+            // Create download link
             const downloadUrl = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = downloadUrl;
-            a.download = `converted-file.${format}`; // Set the filename
+            a.download = `converted-file.${format}`;
             document.body.appendChild(a);
             a.click();
             window.URL.revokeObjectURL(downloadUrl);
             document.body.removeChild(a);
 
-            alert('Conversion completed! Download should begin automatically.');
         } catch (error) {
             alert('An error occurred during conversion');
             console.error(error);
@@ -107,22 +114,5 @@ document.addEventListener('DOMContentLoaded', () => {
         convertButton.disabled = true;
         progressBar.style.width = '0%';
         progressText.textContent = 'Converting... 0%';
-    }
-
-    // Simulate conversion progress
-    function simulateConversion() {
-        return new Promise((resolve) => {
-            let progress = 0;
-            const interval = setInterval(() => {
-                progress += 1;
-                progressBar.style.width = `${progress}%`;
-                progressText.textContent = `Converting... ${progress}%`;
-
-                if (progress >= 100) {
-                    clearInterval(interval);
-                    resolve();
-                }
-            }, 50);
-        });
     }
 }); 

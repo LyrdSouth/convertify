@@ -16,6 +16,10 @@ const upload = multer({ dest: 'uploads/' });
 
 app.use(express.static('public'));
 
+// Add WebSocket support
+const server = require('http').createServer(app);
+const io = require('socket.io')(server);
+
 app.post('/convert', upload.single('file'), (req, res) => {
     if (!req.file) {
         return res.status(400).send('No file uploaded.');
@@ -63,12 +67,14 @@ app.post('/convert', upload.single('file'), (req, res) => {
 
     command
         .on('progress', (progress) => {
-            console.log(`Processing: ${progress.percent}% done`);
+            // Send progress to all connected clients
+            io.emit('conversionProgress', {
+                percent: Math.round(progress.percent)
+            });
         })
         .on('end', () => {
-            // Send the file
+            io.emit('conversionProgress', { percent: 100 });
             res.download(outputPath, `converted-file.${req.body.format}`, (err) => {
-                // Cleanup files after sending or on error
                 try {
                     fs.unlinkSync(inputPath);
                     fs.unlinkSync(outputPath);
@@ -91,6 +97,6 @@ app.post('/convert', upload.single('file'), (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 }); 
